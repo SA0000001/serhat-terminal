@@ -1,7 +1,6 @@
 import os
 import streamlit as st
 import requests
-import ccxt
 import yfinance as yf
 from openai import OpenAI
 import pandas as pd
@@ -83,15 +82,19 @@ def veri_motoru():
     """
     v = {}
 
-    # 1. BTC FİYAT VE HACİM (Binance)
+    # 1. BTC FİYAT VE HACİM (CoinGecko — bulut uyumlu)
     try:
-        ex = ccxt.binance()
-        t = ex.fetch_ticker("BTC/USDT")
-        v["BTC_P"] = f"${t['last']:,.0f}"
-        v["BTC_C"] = f"{t['percentage']:.2f}%"
-        v["Vol_24h"] = f"${int(t['quoteVolume']):,}"
-    except Exception as e:
-        v["BTC_P"] = "Hata"; v["BTC_C"] = "—"; v["Vol_24h"] = "—"
+        cg_btc = requests.get(
+            "https://api.coingecko.com/api/v3/simple/price"
+            "?ids=bitcoin&vs_currencies=usd"
+            "&include_24hr_change=true&include_24hr_vol=true",
+            timeout=8
+        ).json()["bitcoin"]
+        v["BTC_P"]   = f"${cg_btc['usd']:,.0f}"
+        v["BTC_C"]   = f"{cg_btc['usd_24h_change']:.2f}%"
+        v["Vol_24h"] = f"${cg_btc['usd_24h_vol']:,.0f}"
+    except:
+        v["BTC_P"] = "—"; v["BTC_C"] = "—"; v["Vol_24h"] = "—"
 
     # 2. IBIT (BlackRock Bitcoin ETF)
     try:
@@ -131,16 +134,18 @@ def veri_motoru():
     except:
         v["Corr_SP500"] = "—"; v["Corr_Gold"] = "—"
 
-    # 5. MAKRO BALİNA DUVARI AVCISI (5000 kademe, gürültü filtreli)
+    # 5. MAKRO BALİNA DUVARI AVCISI (Kraken — bulut uyumlu)
     try:
         ob = requests.get(
-            "https://api.binance.com/api/v3/depth?symbol=BTCUSDT&limit=5000",
-            timeout=6
+            "https://api.kraken.com/0/public/Depth?pair=XBTUSD&count=500",
+            timeout=8
         ).json()
-        bids = [(float(p), float(q)) for p, q in ob["bids"]]
-        asks = [(float(p), float(q)) for p, q in ob["asks"]]
-        current_p   = bids[0][0]
-        noise       = 250     # Fiyata 250$ yakın emirler manipülatif kabul edilir
+        result = ob["result"]
+        pair_key = list(result.keys())[0]
+        bids = [(float(p), float(q)) for p, q, _ in result[pair_key]["bids"]]
+        asks = [(float(p), float(q)) for p, q, _ in result[pair_key]["asks"]]
+        current_p = bids[0][0]
+        noise       = 250
         bucket_size = 100
 
         filtered_bids = [(p, q) for p, q in bids if p < current_p - noise] or bids[len(bids)//2:]
