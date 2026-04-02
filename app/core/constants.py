@@ -1,0 +1,4 @@
+"""Application constants."""
+
+DEFAULT_TIMEZONE = "UTC"
+HEARTBEAT_STALE_SECONDS = 120

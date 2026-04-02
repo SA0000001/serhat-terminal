@@ -1,0 +1,22 @@
+research:
+  in_sample_ratio: 0.7
+  walk_forward:
+    train_bars: 500
+    test_bars: 200
+    step_bars: 200
+  commission_bps: 10
+  slippage_bps: 5
+trading:
+  assets:
+    BTCUSDT: ["15m", "30m", "1h"]
+    XAUUSD: ["15m", "1h", "4h"]
+    EURUSD: ["30m", "1h", "4h"]
+  risk:
+    daily_warning: 0.04
+    daily_hard: 0.05
+    weekly_warning: 0.08
+    weekly_hard: 0.10
+    max_total_warning: 0.20
+    max_total_hard: 0.25
+dashboard:
+  refresh_seconds: 15
