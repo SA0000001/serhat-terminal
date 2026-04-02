@@ -1,6 +1,8 @@
 import streamlit as st
 
+from app.dashboard.data_provider import open_positions
+
 
 def render() -> None:
     st.header("Open Positions")
-    st.write("TODO: show paper positions with unrealized PnL.")
+    st.dataframe(open_positions(), use_container_width=True)
