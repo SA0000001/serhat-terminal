@@ -1,0 +1,76 @@
+# Trading Research + Paper Trading Platform (Phase 1)
+
+Production-minded starter for **historical research, backtesting, optimization, robust strategy selection, and paper signal monitoring**.
+
+## Scope
+- ✅ Historical data research and backtesting
+- ✅ IS/OOS split and walk-forward starter logic
+- ✅ Robustness-focused candidate ranking
+- ✅ Paper-trading engine with DB state persistence
+- ✅ FastAPI + Streamlit + PostgreSQL + Redis + Celery scaffolding
+- ✅ Telegram notification abstraction
+- ✅ AI diagnostics report scaffolding
+- ✅ Emergency stop / drawdown control starters
+- ❌ Live execution (intentionally out of scope in phase 1)
+
+## Quickstart
+1. Copy environment:
+   ```bash
+   cp .env.example .env
+   ```
+2. Install:
+   ```bash
+   make install
+   ```
+3. Run tests:
+   ```bash
+   make test
+   ```
+4. Start stack:
+   ```bash
+   docker compose up --build
+   ```
+
+## Key endpoints
+- `GET /health`
+- `POST /webhook/signal`
+- `POST /heartbeat/{engine_name}`
+
+## Research workflow (starter)
+1. Load OHLCV (CSV provider currently).
+2. Split in-sample / out-of-sample.
+3. Grid optimize strategy params on IS + validate on OOS.
+4. Score robustness and rank candidates.
+5. Run walk-forward consistency checks.
+6. Promote only robust candidates to paper monitoring.
+
+## Important TODOs
+- Add richer trade lifecycle model (partial exits, fees by venue, mark-to-market snapshots).
+- Add full regime detection and per-asset adaptive strategy routing.
+- Add production scheduler/beat and retry policy.
+- Add authn/authz and audit trails for control-plane actions.
+
+
+## Windows note
+PowerShell:
+```powershell
+cd C:\Users\pc\Downloads\serhat-terminal-master\serhat-terminal-master
+.\scripts\windows_run_dashboard.ps1
+```
+
+CMD:
+```bat
+cd C:\Users\pc\Downloads\serhat-terminal-master\serhat-terminal-master
+scripts\windows_run_dashboard.bat
+```
+
+If you see `ModuleNotFoundError: No module named 'app.dashboard'; 'app' is not a package`, ensure there is no top-level `app.py` shadowing the `app/` package and run Streamlit as:
+```bat
+python -m streamlit run app\dashboard\main.py --server.port 8501
+```
+
+
+## Dashboard quick live wiring
+1. Run API service.
+2. Seed data once: `POST /dashboard/seed-demo`.
+3. Set `API_BASE_URL` in Streamlit env to your API URL.
